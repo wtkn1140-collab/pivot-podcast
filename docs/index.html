@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1c1a17">
+<title>PIVOT 公式チャンネル</title>
+<style>
+:root{--bg:#f6f3ee;--card:#fff;--ink:#1c1a17;--sub:#6f6a62;--line:#e4dfd6;--accent:#b4532a;--bar:#1c1a17;--barink:#f6f3ee}
+@media (prefers-color-scheme:dark){:root{--bg:#141311;--card:#1f1d1a;--ink:#ece8e1;--sub:#9d978d;--line:#2e2b27;--accent:#e0875c;--bar:#26231f;--barink:#ece8e1}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,"Hiragino Sans",sans-serif;padding-bottom:230px}
+header{padding:28px 16px 12px;max-width:720px;margin:auto}
+h1{font-size:22px;margin:0}
+header p{margin:4px 0 0;color:var(--sub);font-size:13px}
+.tabs{display:flex;gap:8px;margin-top:14px}
+.tabs button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:6px 14px;font-size:13px}
+.tabs button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+ul{list-style:none;margin:0 auto;padding:0 16px;max-width:720px}
+li{display:flex;gap:12px;padding:12px;background:var(--card);border:1px solid var(--line);border-radius:12px;margin-bottom:10px;cursor:pointer;align-items:center}
+li.now{border-color:var(--accent)}
+li.done{opacity:.5}
+li img{width:96px;height:54px;object-fit:cover;border-radius:6px;flex:none;background:var(--line)}
+li .t{font-size:14px;font-weight:600;line-height:1.35}
+li .m{font-size:12px;color:var(--sub);margin-top:4px}
+.prog{height:3px;background:var(--line);border-radius:2px;margin-top:6px;overflow:hidden}
+.prog i{display:block;height:100%;background:var(--accent)}
+.sub{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.sub a,.sub button{font-size:13px;border-radius:8px;padding:7px 12px;border:1px solid var(--accent);color:var(--accent);background:none;text-decoration:none}
+#bar{position:fixed;left:0;right:0;bottom:0;background:var(--bar);color:var(--barink);padding:14px 16px calc(14px + env(safe-area-inset-bottom));display:none}
+#bar .in{max-width:720px;margin:auto}
+#np{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#seek{width:100%;margin:10px 0 2px;accent-color:var(--accent)}
+.times{display:flex;justify-content:space-between;font-size:11px;opacity:.7;font-variant-numeric:tabular-nums}
+.ctl{display:flex;align-items:center;justify-content:center;gap:22px;margin-top:6px}
+.ctl button{background:none;border:0;color:inherit;font-size:15px;padding:6px}
+#pp{font-size:30px;width:56px;height:56px;border-radius:50%;background:var(--accent);color:#fff}
+#rate{border:1px solid currentColor;border-radius:999px;padding:3px 10px;font-size:13px}
+</style>
+</head>
+<body>
+<header>
+  <h1>PIVOT 公式チャンネル</h1>
+  <p>再生位置は自動で保存されます</p>
+  <div class="sub"><button id="copy">フィードURLをコピー</button></div>
+  <div class="tabs"><button data-f="all" class="on">すべて</button><button data-f="unplayed">未再生</button></div>
+</header>
+<ul id="list"></ul>
+<div id="bar"><div class="in">
+  <div id="np"></div>
+  <input id="seek" type="range" min="0" max="1000" value="0">
+  <div class="times"><span id="cur">0:00</span><span id="dur">0:00</span></div>
+  <div class="ctl">
+    <button id="back">↺15</button>
+    <button id="pp">▶︎</button>
+    <button id="fwd">30↻</button>
+    <button id="rate">1.0×</button>
+  </div>
+</div></div>
+<audio id="a" preload="metadata"></audio>
+<script>
+const EPS = [{"id": "_AQRXQS1MQ0", "title": "【平良海馬に緊急直撃】MLB挑戦の本音激白／球団との交渉条件／サイ・ヤング賞のスピーチの中身／高校時代の秘話／／日本球界に戻る可能性は？【PIVOT BASEBALL】", "upload_date": "20261121", "duration": 3292, "thumbnail": "https://i.ytimg.com/vi_webp/_AQRXQS1MQ0/maxresdefault.webp", "url": "https://wtkn1140-collab.github.io/pivot-podcast-audio/ep-_AQRXQS1MQ0.m4a"}, {"id": "N8xZBajXL4E", "title": "【成長企業はフリーランス活用率が2倍】社内にない専門性を外から取り入れる時代／外部プロ人材をうまく活用できる企業の条件／AI時代の人事戦略再設計", "upload_date": "20261121", "duration": 1646, "thumbnail": "https://i.ytimg.com/vi/N8xZBajXL4E/maxresdefault.jpg", "url": "https://wtkn1140-collab.github.io/pivot-podcast-audio/ep-N8xZBajXL4E.m4a"}, {"id": "2I_BW_1plW8", "title": "【スマホ首による健康被害】スマホ首の原因は首じゃない？／首回しは絶対NG／現状把握アセスメント／2分で効くイエス・ノー運動／ストレス肩こりの対処法／枕は金額で選ぶな【PIVOT HEALTH】", "upload_date": "20261121", "duration": 2316, "thumbnail": "https://i.ytimg.com/vi_webp/2I_BW_1plW8/maxresdefault.webp", "url": "https://wtkn1140-collab.github.io/pivot-podcast-audio/ep-2I_BW_1plW8.m4a"}, {"id": "L0xxizmWfG8", "title": "【徹底解説60分：東野圭吾】累計1億冊以上／電子化を拒んだ理由／現代社会と生存戦略／中国で大ヒットした作品／松本清張とのアナロジー／下町の原体験／銀座と作家生活／本を読まない人にも読ませる工夫", "upload_date": "20261121", "duration": 3452, "thumbnail": "https://i.ytimg.com/vi_webp/L0xxizmWfG8/maxresdefault.webp", "url": "https://wtkn1140-collab.github.io/pivot-podcast-audio/ep-L0xxizmWfG8.m4a"}, {"id": "Sq3CfYudcOg", "title": "【詰め込み式教育の価値が暴落】賢い親たちの結論／／認知的持久力とは？／決断力が大事な理由とは？／サッカーと飲み会が大事な理由／山口真由×中室牧子×安田洋祐【EDUCATION SKILL SET】", "upload_date": "20261120", "duration": 2449, "thumbnail": "https://i.ytimg.com/vi_webp/Sq3CfYudcOg/maxresdefault.webp", "url": "https://wtkn1140-collab.github.io/pivot-podcast-audio/ep-Sq3CfYudcOg.m4a"}, {"id": "VJE7fdvirsE", "title": "【速報解説：アンソロピック、上場後の４大リスク】公開価格を超えた理由／頂点を目指す宣言／NVIDIA問題の余波は？／データセンター規制の影響／東南アジアのクラウド問題／金利上昇のリスク", "upload_date": "20261120", "duration": 1291, "thumbnail": "https://i.ytimg.com/vi_webp/VJE7fdvirsE/maxresdefault.webp", "url": "https://wtkn1140-collab.github.io/pivot-podcast-audio/ep-VJE7fdvirsE.m4a"}, {"id": "VUxwS-7m2sM", "title": "【不正発見のきっかけの7割が内部通報】公益通報者保護制度を徹底解説／12/1改正法施行 4つの新ルールとは／フリーランスも保護対象に／通報窓口は？", "upload_date": "20261120", "duration": 2261, "thumbnail": "https://i.ytimg.com/vi/VUxwS-7m2sM/maxresdefault.jpg", "url": "https://wtkn1140-collab.github.io/pivot-podcast-audio/ep-VUxwS-7m2sM.m4a"}, {"id": "hjm-dKR4Als", "title": "【世界のAIを支える キオクシアの正体】AI時代のデータ基盤を支えるキオクシア／SSD需要拡大の理由／1秒間に1億回の読み出しを目指す次世代SSD技術とは", "upload_date": "20261120", "duration": 970, "thumbnail": "https://i.ytimg.com/vi_webp/hjm-dKR4Als/maxresdefault.webp", "url": "https://wtkn1140-collab.github.io/pivot-podcast-audio/ep-hjm-dKR4Als.m4a"}, {"id": "caLd_FrLDJE", "title": "【日本外交は70〜80点】米中ロの陰で成果／本当の注目はAPEC前のクアッド／アメリカの多国間主義が帰ってきた／G20に向けた日中関係に伏線／アジア版IEA", "upload_date": "20261120", "duration": 886, "thumbnail": "https://i.ytimg.com/vi_webp/caLd_FrLDJE/maxresdefault.webp", "url": "https://wtkn1140-collab.github.io/pivot-podcast-audio/ep-caLd_FrLDJE.m4a"}, {"id": "VqLtPFNGEC4", "title": "【一番大事なのはマーケットに居続けること】資産3000万円から富裕層を目指す資産運用サービス／気づかなかった選択肢を対話で引き出す“壁打ち”／何度相談しても無料／運用スタイル診断", "upload_date": "20261120", "duration": 2229, "thumbnail": "https://i.ytimg.com/vi/VqLtPFNGEC4/maxresdefault.jpg", "url": "https://wtkn1140-collab.github.io/pivot-podcast-audio/ep-VqLtPFNGEC4.m4a"}, {"id": "4u28oVffEHw", "title": "【最新解説：ホンハイのEV戦略。日本と組みたがる理由】AIインフラ製造企業への脱皮／三菱電機モビリティとのタッグ／EV、ヘルスケア、ロボットを強化／単なる組み立て企業ではない／軽トラEVを開発", "upload_date": "20261119", "duration": 1124, "thumbnail": "https://i.ytimg.com/vi_webp/4u28oVffEHw/maxresdefault.webp", "url": "https://wtkn1140-collab.github.io/pivot-podcast-audio/ep-4u28oVffEHw.m4a"}, {"id": "BTmzITSe0l4", "title": "目標10億円への資産倍増計画／打診買いはしない／負けたら取り返しにいく／スピードが命／株主優待50銘柄保有／長期と短期のハイブリッド投資／八木に相談「お金を早く倍にする方法」【MONEY MONEY】", "upload_date": "20261119", "duration": 2077, "thumbnail": "https://i.ytimg.com/vi_webp/BTmzITSe0l4/maxresdefault.webp", "url": "https://wtkn1140-collab.github.io/pivot-podcast-audio/ep-BTmzITSe0l4.m4a"}, {"id": "mOX5I03lfsc", "title": "【大阪で進む新時代の都市開発】グラングリーン大阪／新エリアのうめきたの森を体験／プロデューサーはUR都市機構／広大なみどり空間／成功の秘訣は民間と行政の連携／憩い空間と防災機能の両立／周辺道路も便利に", "upload_date": "20261119", "duration": 1702, "thumbnail": "https://i.ytimg.com/vi/mOX5I03lfsc/maxresdefault.jpg", "url": "https://wtkn1140-collab.github.io/pivot-podcast-audio/ep-mOX5I03lfsc.m4a"}, {"id": "M9KjXkuXOSo", "title": "【気がついたらお金はなくなっていた】家入一真が語る会社売却の落とし穴 / 資産管理会社 / 債券×不動産／会社売却後のリアルな資産運用術を学ぶ / ミニマムタックス / M&A", "upload_date": "20261119", "duration": 2419, "thumbnail": "https://i.ytimg.com/vi/M9KjXkuXOSo/maxresdefault.jpg", "url": "https://wtkn1140-collab.github.io/pivot-podcast-audio/ep-M9KjXkuXOSo.m4a"}, {"id": "f4lJ5Z8z7LA", "title": "【速報解説】唯一合意できる可能性があるのは？／「3カ国による世界統治」は誇大広告だ／米中とロシアの間の圧倒的格差／核軍縮は中国が飲めない／米中GPU第三国迂回規制の攻防／北朝鮮電撃会談の可能性", "upload_date": "20261119", "duration": 934, "thumbnail": "https://i.ytimg.com/vi/f4lJ5Z8z7LA/maxresdefault.jpg", "url": "https://wtkn1140-collab.github.io/pivot-podcast-audio/ep-f4lJ5Z8z7LA.m4a"}];
+const FEED = 'https://wtkn1140-collab.github.io/pivot-podcast/feed.xml';
+document.getElementById('copy').onclick = async ev => {
+  try{ await navigator.clipboard.writeText(FEED); ev.target.textContent = 'コピーしました'; }
+  catch(e){ prompt('このURLをポッドキャストアプリに登録', FEED); }
+};
+const a = document.getElementById('a'), list = document.getElementById('list');
+const RATES = [1, 1.25, 1.5, 1.75, 2];
+let cur = null, filter = 'all';
+
+function load(k, d){ try{ const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); }catch(e){ return d; } }
+function save(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+let pos = load('pos', {}), done = load('done', {}), rate = load('rate', 1);
+
+function fmt(s){ s = Math.floor(s||0); const h = Math.floor(s/3600), m = Math.floor(s%3600/60), x = String(s%60).padStart(2,'0');
+  return h ? `${h}:${String(m).padStart(2,'0')}:${x}` : `${m}:${x}`; }
+function date(d){ return d ? `${d.slice(0,4)}/${d.slice(4,6)}/${d.slice(6)}` : ''; }
+
+function render(){
+  list.innerHTML = '';
+  EPS.filter(e => filter === 'all' || !done[e.id]).forEach(e => {
+    const li = document.createElement('li');
+    li.className = (cur && cur.id === e.id ? 'now ' : '') + (done[e.id] ? 'done' : '');
+    const p = done[e.id] ? 100 : Math.min(100, (pos[e.id]||0) / (e.duration||1) * 100);
+    const left = done[e.id] ? '再生済み' : pos[e.id] ? `残り ${fmt(e.duration - pos[e.id])}` : fmt(e.duration);
+    li.innerHTML = `<img loading="lazy" src="${e.thumbnail}" alt=""><div style="min-width:0;flex:1">
+      <div class="t"></div><div class="m">${date(e.upload_date)}・${left}</div>
+      <div class="prog"><i style="width:${p}%"></i></div></div>`;
+    li.querySelector('.t').textContent = e.title;
+    li.onclick = () => play(e);
+    list.appendChild(li);
+  });
+}
+
+function play(e){
+  if (cur && cur.id === e.id){ a.paused ? a.play() : a.pause(); return; }
+  cur = e;
+  a.src = e.url;
+  a.playbackRate = rate;
+  const start = done[e.id] ? 0 : (pos[e.id] || 0);
+  a.addEventListener('loadedmetadata', () => { a.currentTime = start; a.playbackRate = rate; }, {once:true});
+  a.play();
+  document.getElementById('bar').style.display = 'block';
+  document.getElementById('np').textContent = e.title;
+  if ('mediaSession' in navigator){
+    navigator.mediaSession.metadata = new MediaMetadata({title: e.title, artist: 'PIVOT',
+      artwork: [{src: e.thumbnail, sizes: '480x360', type: 'image/jpeg'}]});
+  }
+  render();
+}
+
+let lastSave = 0;
+a.addEventListener('timeupdate', () => {
+  if (!cur) return;
+  document.getElementById('cur').textContent = fmt(a.currentTime);
+  document.getElementById('dur').textContent = fmt(a.duration);
+  document.getElementById('seek').value = a.duration ? a.currentTime / a.duration * 1000 : 0;
+  if (Date.now() - lastSave > 5000){ pos[cur.id] = a.currentTime; save('pos', pos); lastSave = Date.now(); }
+});
+a.addEventListener('pause', () => { if (cur){ pos[cur.id] = a.currentTime; save('pos', pos); render(); } });
+a.addEventListener('play', () => document.getElementById('pp').textContent = '❚❚');
+a.addEventListener('pause', () => document.getElementById('pp').textContent = '▶︎');
+a.addEventListener('ended', () => {
+  done[cur.id] = true; delete pos[cur.id]; save('done', done); save('pos', pos);
+  const next = EPS.slice(0, EPS.findIndex(e => e.id === cur.id)).reverse().find(e => !done[e.id]);
+  next ? play(next) : render();
+});
+
+const skip = s => a.currentTime = Math.max(0, Math.min(a.duration || 0, a.currentTime + s));
+document.getElementById('pp').onclick = () => a.paused ? a.play() : a.pause();
+document.getElementById('back').onclick = () => skip(-15);
+document.getElementById('fwd').onclick = () => skip(30);
+document.getElementById('seek').oninput = ev => { if (a.duration) a.currentTime = ev.target.value / 1000 * a.duration; };
+const rateBtn = document.getElementById('rate');
+rateBtn.textContent = rate.toFixed(2).replace(/0$/,'') + '×';
+rateBtn.onclick = () => { rate = RATES[(RATES.indexOf(rate) + 1) % RATES.length]; a.playbackRate = rate; save('rate', rate);
+  rateBtn.textContent = rate.toFixed(2).replace(/0$/,'') + '×'; };
+if ('mediaSession' in navigator){
+  navigator.mediaSession.setActionHandler('seekbackward', () => skip(-15));
+  navigator.mediaSession.setActionHandler('seekforward', () => skip(30));
+}
+document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('.tabs button').forEach(x => x.classList.toggle('on', x === b));
+  filter = b.dataset.f; render();
+});
+render();
+</script>
+</body>
+</html>
